@@ -46,12 +46,27 @@ export class AuditService {
   }
 
   // list
-  static async listAudits() {
-    const docs = await AuditModel.find().sort({ createdAt: -1 });
-    // format each with async mapping
-    const formatted = await Promise.all(docs.map((d) => this.formatAudit(d)));
-    return formatted;
-  }
+static async listAudits(page = 1, limit = 10) {
+  const skip = (page - 1) * limit;
+
+  const total = await AuditModel.countDocuments();
+
+  const docs = await AuditModel.find()
+    .sort({ createdAt: -1 })
+    .skip(skip)
+    .limit(limit);
+
+  const formatted = await Promise.all(docs.map((d) => this.formatAudit(d)));
+
+  return {
+    total,
+    page,
+    limit,
+    pages: Math.ceil(total / limit),
+    data: formatted
+  };
+}
+
 
   // get by id
   static async getAuditById(id: string) {

@@ -15,14 +15,22 @@ export class AuditController {
     }
   }
 
-  static async list(req: Request, res: Response, next: NextFunction) {
-    try {
-      const audits = await AuditService.listAudits();
-      return res.status(200).json({ success: true, count: audits.length, data: audits });
-    } catch (err) {
-      next(err);
-    }
+static async list(req: Request, res: Response, next: NextFunction) {
+  try {
+    const page = Number(req.query.page) || 1;
+    const limit = Number(req.query.limit) || 10;
+
+    const audits = await AuditService.listAudits(page, limit);
+
+    return res.status(200).json({
+      success: true,
+      ...audits
+    });
+  } catch (err) {
+    next(err);
   }
+}
+
 
   static async getById(req: Request, res: Response, next: NextFunction) {
     try {
