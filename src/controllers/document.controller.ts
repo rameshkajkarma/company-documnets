@@ -15,18 +15,22 @@ export class DocumentController {
     }
   }
 
-  static async list(req: Request, res: Response, next: NextFunction) {
-    try {
-      const docs = await DocumentService.listDocuments();
-      return res.status(200).json({
-        success: true,
-        count: docs.length,
-        data: docs
-      });
-    } catch (err) {
-      next(err);
-    }
+static async list(req: Request, res: Response, next: NextFunction) {
+  try {
+    const page = Number(req.query.page) || 1;
+    const limit = Number(req.query.limit) || 10;
+
+    const docs = await DocumentService.listDocuments(page, limit);
+
+    return res.status(200).json({
+      success: true,
+      ...docs
+    });
+  } catch (err) {
+    next(err);
   }
+}
+
 
   static async getById(req: Request, res: Response, next: NextFunction) {
     try {

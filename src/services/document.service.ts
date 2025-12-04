@@ -32,10 +32,25 @@ export class DocumentService {
   }
 
   // LIST
-  static async listDocuments() {
-    const docs = await DocumentModel.find().sort({ createdAt: -1 });
-    return docs.map((d) => this.formatDocument(d));
-  }
+static async listDocuments(page = 1, limit = 10) {
+  const skip = (page - 1) * limit;
+
+  const total = await DocumentModel.countDocuments();
+
+  const docs = await DocumentModel.find()
+    .sort({ createdAt: -1 })
+    .skip(skip)
+    .limit(limit);
+
+  return {
+    total,
+    page,
+    limit,
+    pages: Math.ceil(total / limit),
+    data: docs.map((d) => this.formatDocument(d))
+  };
+}
+
 
   // GET BY ID
   static async getDocumentById(id: string) {
