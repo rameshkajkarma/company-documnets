@@ -4,7 +4,7 @@ import dotenv from 'dotenv';
 import licenseRoutes from './routes/license.routes';
 import { errorHandler } from './middlewares/error.middleware';
 dotenv.config();
-
+import documnentRoutes from './routes/document.routes'; 
 const app = express();
 
 app.use(morgan('dev'));
@@ -14,7 +14,7 @@ app.use(express.urlencoded({ extended: true }));
 app.get('/health', (req, res) => res.json({ ok: true }));
 
 app.use('/api/licenses', licenseRoutes);
-
+app.use('/api/documents', documnentRoutes);
 app.use(errorHandler);
 
 export default app;
