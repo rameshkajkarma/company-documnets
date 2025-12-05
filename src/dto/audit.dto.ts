@@ -1,17 +1,36 @@
-export interface CreateAuditDTO {
-  name: string;
-  type: string;
-  periodStart: Date | string;
-  periodEnd: Date | string;
-  auditor: string;
-  completionDate: Date | string;
-}
+import Joi from "joi";
 
-export interface UpdateAuditDTO {
-  name?: string;
-  type?: string;
-  periodStart?: Date | string;
-  periodEnd?: Date | string;
-  auditor?: string;
-  completionDate?: Date | string;
-}
+export const allowedAuditTypes = [
+  "Financial Audit",
+  "Internal Audit",
+  "Compliance Audit",
+  "Tax Audit",
+  "Operational Audit"
+];
+
+// =============== CREATE DTO =================
+export const createAuditDto = Joi.object({
+  name: Joi.string().required(),
+  type: Joi.string().valid(...allowedAuditTypes).required(),
+  periodStart: Joi.date().required(),
+  periodEnd: Joi.date().required(),
+  auditor: Joi.string().required(),
+  completionDate: Joi.date().required(),
+  file: Joi.any().optional() // multer file
+});
+
+// =============== UPDATE DTO =================
+export const updateAuditDto = Joi.object({
+  name: Joi.string().optional(),
+  type: Joi.string().valid(...allowedAuditTypes).optional(),
+  periodStart: Joi.date().optional(),
+  periodEnd: Joi.date().optional(),
+  auditor: Joi.string().optional(),
+  completionDate: Joi.date().optional(),
+  file: Joi.any().optional()
+});
+
+// =============== PARAM ID DTO ===============
+export const auditIdDto = Joi.object({
+  id: Joi.string().length(24).hex().required()
+});

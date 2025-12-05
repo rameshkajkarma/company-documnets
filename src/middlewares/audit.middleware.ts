@@ -1,48 +1,73 @@
 import { Request, Response, NextFunction } from "express";
-import { CreateAuditDTO, UpdateAuditDTO } from "../dto/audit.dto";
+import Joi, { ObjectSchema } from "joi";
+import { throwJoiValidationError } from "../utils/response.util";
 import { allowedAuditTypes } from "../models/audit.model";
 
+// ======================================================
+// CREATE Audit Schema
+// ======================================================
+const createAuditSchema: ObjectSchema = Joi.object({
+  name: Joi.string().required(),
+  type: Joi.string()
+    .valid(...allowedAuditTypes)
+    .required(),
+  periodStart: Joi.date().required(),
+  periodEnd: Joi.date().required(),
+  auditor: Joi.string().required(),
+  completionDate: Joi.date().required()
+});
+
+// ======================================================
+// UPDATE Audit Schema
+// ======================================================
+const updateAuditSchema: ObjectSchema = Joi.object({
+  name: Joi.string().optional(),
+  type: Joi.string()
+    .valid(...allowedAuditTypes)
+    .optional(),
+  periodStart: Joi.date().optional(),
+  periodEnd: Joi.date().optional(),
+  auditor: Joi.string().optional(),
+  completionDate: Joi.date().optional()
+}).min(1); // at least one field must be present
+
+// ======================================================
+// Generic Validator (Same as your validateRequest)
+// ======================================================
+const runValidation = (schema: ObjectSchema, data: any) => {
+  const { error, value } = schema.validate(data, {
+    abortEarly: true,
+    stripUnknown: true,
+    convert: true,
+  });
+
+  if (error) {
+    const msg = error.details[0].message.replace(/"/g, "");
+    throw throwJoiValidationError(msg);
+  }
+
+  return value;
+};
+
+// ======================================================
+// Middleware Exports
+// ======================================================
 export class AuditMiddleware {
   static validateCreate(req: Request, res: Response, next: NextFunction) {
-    const body = req.body as CreateAuditDTO;
-
-    if (!body.name)
-      return res.status(400).json({ message: "Audit name is required" });
-
-    if (!body.type)
-      return res.status(400).json({ message: "Audit type is required" });
-
-    // ✅ Validate type against allowed list
-    if (!allowedAuditTypes.includes(body.type))
-      return res.status(400).json({
-        message: `Invalid audit type. Allowed: ${allowedAuditTypes.join(", ")}`
-      });
-
-    if (!body.periodStart)
-      return res.status(400).json({ message: "Audit period start is required" });
-
-    if (!body.periodEnd)
-      return res.status(400).json({ message: "Audit period end is required" });
-
-    if (!body.auditor)
-      return res.status(400).json({ message: "Auditor is required" });
-
-    if (!body.completionDate)
-      return res.status(400).json({ message: "Completion date is required" });
-
-    next();
+    try {
+      req.body = runValidation(createAuditSchema, req.body);
+      next();
+    } catch (err) {
+      next(err);
+    }
   }
 
   static validateUpdate(req: Request, res: Response, next: NextFunction) {
-    const body = req.body as UpdateAuditDTO;
-
-    // If type is being updated → validate it
-    if (body.type && !allowedAuditTypes.includes(body.type)) {
-      return res.status(400).json({
-        message: `Invalid audit type. Allowed: ${allowedAuditTypes.join(", ")}`
-      });
+    try {
+      req.body = runValidation(updateAuditSchema, req.body);
+      next();
+    } catch (err) {
+      next(err);
     }
-
-    next();
   }
 }

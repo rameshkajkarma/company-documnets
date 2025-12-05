@@ -1,19 +1,46 @@
 import { Router } from "express";
 import multer from "multer";
-import { AuditController } from "../controllers/audit.controller";
-import { AuditMiddleware } from "../middlewares/audit.middleware";
 
-const upload = multer({ storage: multer.memoryStorage() });
+import * as AuditController from "../controllers/audit.controller";
+import { validateRequest, validateParams } from "../middlewares/validate.middleware";
+
+import {
+  createAuditDto,
+  updateAuditDto,
+  auditIdDto
+} from "../dto/audit.dto";
+
 const router = Router();
 
-router.post("/", upload.single("file"), AuditMiddleware.validateCreate, AuditController.create);
+const upload = multer({ storage: multer.memoryStorage() });
+
+router.post(
+  "/",
+  upload.single("file"),
+  validateRequest(createAuditDto),
+  AuditController.create
+);
 
 router.get("/", AuditController.list);
 
-router.get("/:id", AuditController.getById);
+router.get(
+  "/:id",
+  validateParams(auditIdDto),
+  AuditController.getById
+);
 
-router.put("/:id", upload.single("file"), AuditMiddleware.validateUpdate, AuditController.update);
+router.put(
+  "/:id",
+  upload.single("file"),
+  validateParams(auditIdDto),
+  validateRequest(updateAuditDto),
+  AuditController.update
+);
 
-router.delete("/:id", AuditController.delete);
+router.delete(
+  "/:id",
+  validateParams(auditIdDto),
+  AuditController.deleteAudit
+);
 
 export default router;

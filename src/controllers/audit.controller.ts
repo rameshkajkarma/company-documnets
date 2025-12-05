@@ -1,64 +1,78 @@
-import { Request, Response, NextFunction } from "express";
-import { AuditService } from "../services/audit.service";
+import { Request, Response } from "express";
+import * as AuditService from "../services/audit.service";
+import {
+  sendSuccess,
+  sendCreated,
+  sendError,
+  ERROR_MESSAGES,
+  SUCCESS_MESSAGES,
+} from "../utils/response.util";
 
-export class AuditController {
-  static async create(req: Request, res: Response, next: NextFunction) {
-    try {
-      const audit = await AuditService.createAudit(req.body, req.file);
-      return res.status(201).json({
-        success: true,
-        message: "Audit created successfully",
-        data: await AuditService.formatAudit(audit)
-      });
-    } catch (err) {
-      next(err);
-    }
-  }
-
-static async list(req: Request, res: Response, next: NextFunction) {
+export const create = async (req: Request, res: Response) => {
   try {
-    const page = Number(req.query.page) || 1;
-    const limit = Number(req.query.limit) || 10;
+    const audit = await AuditService.create(req.body, req.file);
+    return sendCreated(res, SUCCESS_MESSAGES.DOCUMENT_CREATED, audit);
+  } catch (error: any) {
+    return sendError(res, 500, ERROR_MESSAGES.INTERNAL_SERVER_ERROR, error.message);
+  }
+};
 
-    const audits = await AuditService.listAudits(page, limit);
+export const list = async (req: Request, res: Response) => {
+  try {
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 10;
 
-    return res.status(200).json({
-      success: true,
-      ...audits
+    const { data, total } = await AuditService.getAll(page, limit);
+
+    return sendSuccess(res, SUCCESS_MESSAGES.DOCUMENT_LIST_FETCHED, {
+      total,
+      page,
+      limit,
+      data,
     });
-  } catch (err) {
-    next(err);
+  } catch (error: any) {
+    return sendError(res, 500, ERROR_MESSAGES.INTERNAL_SERVER_ERROR, error.message);
   }
-}
+};
 
+export const getById = async (req: Request, res: Response) => {
+  try {
+    const audit = await AuditService.getOne(req.params.id);
 
-  static async getById(req: Request, res: Response, next: NextFunction) {
-    try {
-      const audit = await AuditService.getAuditById(req.params.id);
-      if (!audit) return res.status(404).json({ message: "Audit not found" });
-      return res.status(200).json({ success: true, data: audit });
-    } catch (err) {
-      next(err);
+    if (!audit) {
+      return sendError(res, 404, ERROR_MESSAGES.DOCUMENT_NOT_FOUND);
     }
-  }
 
-  static async update(req: Request, res: Response, next: NextFunction) {
-    try {
-      const audit = await AuditService.updateAudit(req.params.id, req.body, req.file);
-      if (!audit) return res.status(404).json({ message: "Audit not found" });
-      return res.status(200).json({ success: true, message: "Audit updated successfully", data: audit });
-    } catch (err) {
-      next(err);
-    }
+    return sendSuccess(res, SUCCESS_MESSAGES.DOCUMENT_FETCHED, audit);
+  } catch (error: any) {
+    return sendError(res, 500, ERROR_MESSAGES.INTERNAL_SERVER_ERROR, error.message);
   }
+};
 
-  static async delete(req: Request, res: Response, next: NextFunction) {
-    try {
-      const audit = await AuditService.deleteAudit(req.params.id);
-      if (!audit) return res.status(404).json({ message: "Audit not found" });
-      return res.status(200).json({ success: true, message: "Audit deleted successfully" });
-    } catch (err) {
-      next(err);
+export const update = async (req: Request, res: Response) => {
+  try {
+    const audit = await AuditService.update(req.params.id, req.body, req.file);
+
+    if (!audit) {
+      return sendError(res, 404, ERROR_MESSAGES.DOCUMENT_NOT_FOUND);
     }
+
+    return sendSuccess(res, SUCCESS_MESSAGES.DOCUMENT_UPDATED, audit);
+  } catch (error: any) {
+    return sendError(res, 500, ERROR_MESSAGES.INTERNAL_SERVER_ERROR, error.message);
   }
-}
+};
+
+export const deleteAudit = async (req: Request, res: Response) => {
+  try {
+    const removed = await AuditService.remove(req.params.id);
+
+    if (!removed) {
+      return sendError(res, 404, ERROR_MESSAGES.DOCUMENT_NOT_FOUND);
+    }
+
+    return sendSuccess(res, SUCCESS_MESSAGES.DOCUMENT_DELETED);
+  } catch (error: any) {
+    return sendError(res, 500, ERROR_MESSAGES.INTERNAL_SERVER_ERROR, error.message);
+  }
+};
