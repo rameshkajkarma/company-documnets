@@ -3,7 +3,7 @@ import { ObjectSchema } from "joi";
 import { throwJoiValidationError } from "../utils/response.util";
 
 // ===============================
-// Validate BODY (POST / PUT)
+// BODY (POST, PUT)
 // ===============================
 export const validateDocumentBody = (schema: ObjectSchema) => {
   return (req: Request, res: Response, next: NextFunction): void => {
@@ -15,8 +15,7 @@ export const validateDocumentBody = (schema: ObjectSchema) => {
       });
 
       if (error) {
-        const msg = error.details[0].message.replace(/"/g, "");
-        throw throwJoiValidationError(msg);
+        throw throwJoiValidationError(error.details[0].message.replace(/"/g, ""));
       }
 
       req.body = value;
@@ -28,7 +27,7 @@ export const validateDocumentBody = (schema: ObjectSchema) => {
 };
 
 // ===============================
-// Validate PARAMS (/:id)
+// PARAMS (/:id)
 // ===============================
 export const validateDocumentParams = (schema: ObjectSchema) => {
   return (req: Request, res: Response, next: NextFunction): void => {
@@ -39,8 +38,7 @@ export const validateDocumentParams = (schema: ObjectSchema) => {
       });
 
       if (error) {
-        const msg = error.details[0].message.replace(/"/g, "");
-        throw throwJoiValidationError(msg);
+        throw throwJoiValidationError(error.details[0].message.replace(/"/g, ""));
       }
 
       req.params = value;
@@ -52,7 +50,7 @@ export const validateDocumentParams = (schema: ObjectSchema) => {
 };
 
 // ===============================
-// Validate QUERY (?search, ?page)
+// QUERY (?search, ?page, ?limit)
 // ===============================
 export const validateDocumentQuery = (schema: ObjectSchema) => {
   return (req: Request, res: Response, next: NextFunction): void => {
@@ -64,8 +62,7 @@ export const validateDocumentQuery = (schema: ObjectSchema) => {
       });
 
       if (error) {
-        const msg = error.details[0].message.replace(/"/g, "");
-        throw throwJoiValidationError(msg);
+        throw throwJoiValidationError(error.details[0].message.replace(/"/g, ""));
       }
 
       req.query = value;

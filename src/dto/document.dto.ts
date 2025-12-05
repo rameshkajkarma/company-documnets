@@ -1,19 +1,6 @@
-// export interface CreateDocumentDTO {
-//   name: string;
-//   category: string;
-//   documentDate: Date | string;
-//   partiesInvolved: string;
-// }
-
-// export interface UpdateDocumentDTO {
-//   name?: string;
-//   category?: string;
-//   documentDate?: Date | string;
-//   partiesInvolved?: string;
-// }
-
 import Joi from "joi";
 
+// CREATE
 export const createDocumentSchema = Joi.object({
   name: Joi.string().required(),
   category: Joi.string()
@@ -23,6 +10,7 @@ export const createDocumentSchema = Joi.object({
   partiesInvolved: Joi.string().required(),
 });
 
+// UPDATE
 export const updateDocumentSchema = Joi.object({
   name: Joi.string().optional(),
   category: Joi.string()
@@ -32,6 +20,14 @@ export const updateDocumentSchema = Joi.object({
   partiesInvolved: Joi.string().optional(),
 });
 
+// GET by ID
 export const getDocumentByIdSchema = Joi.object({
   id: Joi.string().required(),
+});
+
+// LIST QUERY
+export const listDocumentQuerySchema = Joi.object({
+  search: Joi.string().optional(),
+  page: Joi.number().integer().min(1).default(1),
+  limit: Joi.number().integer().min(1).max(100).default(10),
 });
