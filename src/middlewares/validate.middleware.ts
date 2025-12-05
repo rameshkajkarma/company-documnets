@@ -2,9 +2,7 @@ import { Request, Response, NextFunction } from "express";
 import { ObjectSchema } from "joi";
 import { throwJoiValidationError } from "../utils/response.util";
 
-// ===============================
-// Validate Request Body
-// ===============================
+
 export const validateRequest = (schema: ObjectSchema) => {
   return (req: Request, res: Response, next: NextFunction): void => {
     try {
@@ -27,9 +25,7 @@ export const validateRequest = (schema: ObjectSchema) => {
   };
 };
 
-// ===============================
-// Validate URL Params (ID)
-// ===============================
+
 export const validateParams = (schema: ObjectSchema) => {
   return (req: Request, res: Response, next: NextFunction): void => {
     try {
