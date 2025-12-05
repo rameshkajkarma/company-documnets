@@ -1,36 +1,77 @@
 import { Request, Response, NextFunction } from "express";
-import { CreateDocumentDTO, UpdateDocumentDTO } from "../dto/document.dto";
+import { ObjectSchema } from "joi";
+import { throwJoiValidationError } from "../utils/response.util";
 
-export class DocumentMiddleware {
-static validateCreate(req: Request, res: Response, next: NextFunction) {
-  const body = req.body as CreateDocumentDTO;
+// ===============================
+// Validate BODY (POST / PUT)
+// ===============================
+export const validateDocumentBody = (schema: ObjectSchema) => {
+  return (req: Request, res: Response, next: NextFunction): void => {
+    try {
+      const { error, value } = schema.validate(req.body, {
+        abortEarly: true,
+        stripUnknown: true,
+        convert: true,
+      });
 
-  const allowed = ["Contract", "Template", "Agreement", "Policy", "Other"];
+      if (error) {
+        const msg = error.details[0].message.replace(/"/g, "");
+        throw throwJoiValidationError(msg);
+      }
 
-  if (!body.name) return res.status(400).json({ message: "Name is required" });
-  if (!body.category) return res.status(400).json({ message: "Category is required" });
-
-  if (!allowed.includes(body.category)) {
-    return res.status(400).json({ 
-      message: `Invalid category. Allowed: ${allowed.join(", ")}` 
-    });
-  }
-
-  if (!body.documentDate) return res.status(400).json({ message: "Document date is required" });
-  if (!body.partiesInvolved) return res.status(400).json({ message: "Parties involved is required" });
-
-  next();
-}
-
-
-  static validateUpdate(req: Request, res: Response, next: NextFunction) {
-    const body = req.body as UpdateDocumentDTO;
-
-    // Allow partial update, but at least one field must be sent
-    if (!body.name && !body.category && !body.documentDate && !body.partiesInvolved && !req.file) {
-      return res.status(400).json({ message: "At least one field is required to update" });
+      req.body = value;
+      next();
+    } catch (err) {
+      next(err);
     }
+  };
+};
 
-    next();
-  }
-}
+// ===============================
+// Validate PARAMS (/:id)
+// ===============================
+export const validateDocumentParams = (schema: ObjectSchema) => {
+  return (req: Request, res: Response, next: NextFunction): void => {
+    try {
+      const { error, value } = schema.validate(req.params, {
+        abortEarly: true,
+        stripUnknown: true,
+      });
+
+      if (error) {
+        const msg = error.details[0].message.replace(/"/g, "");
+        throw throwJoiValidationError(msg);
+      }
+
+      req.params = value;
+      next();
+    } catch (err) {
+      next(err);
+    }
+  };
+};
+
+// ===============================
+// Validate QUERY (?search, ?page)
+// ===============================
+export const validateDocumentQuery = (schema: ObjectSchema) => {
+  return (req: Request, res: Response, next: NextFunction): void => {
+    try {
+      const { error, value } = schema.validate(req.query, {
+        abortEarly: true,
+        stripUnknown: true,
+        convert: true,
+      });
+
+      if (error) {
+        const msg = error.details[0].message.replace(/"/g, "");
+        throw throwJoiValidationError(msg);
+      }
+
+      req.query = value;
+      next();
+    } catch (err) {
+      next(err);
+    }
+  };
+};

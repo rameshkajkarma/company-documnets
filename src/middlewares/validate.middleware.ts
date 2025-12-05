@@ -1,16 +1,52 @@
-import { Request, Response, NextFunction } from 'express';
-import Joi from 'joi';
+import { Request, Response, NextFunction } from "express";
+import { ObjectSchema } from "joi";
+import { throwJoiValidationError } from "../utils/response.util"; // use your helper
 
-export const validate = (schema: Joi.ObjectSchema) => {
-  return (req: Request, res: Response, next: NextFunction) => {
-    // Combine body and query for flexible validation (mainly body used here)
-    const toValidate = req.body;
-    const { error, value } = schema.validate(toValidate, { abortEarly: false, stripUnknown: true });
-    if (error) {
-      const details = error.details.map(d => d.message);
-      return res.status(400).json({ success: false, message: 'Validation error', details });
+// ========================
+// Validate Body
+// ========================
+export const validateRequest = (schema: ObjectSchema) => {
+  return (req: Request, res: Response, next: NextFunction): void => {
+    try {
+      const { error, value } = schema.validate(req.body, {
+        abortEarly: true,      // stop on first error
+        stripUnknown: true,    // remove extra fields
+        convert: true,         // auto convert types
+      });
+
+      if (error) {
+        const msg = error.details[0].message.replace(/"/g, "");
+        throw throwJoiValidationError(msg);
+      }
+
+      req.body = value;
+      next();
+    } catch (err) {
+      next(err);
     }
-    req.body = value;
-    return next();
+  };
+};
+
+// ========================
+// Validate Params (ID)
+// ========================
+export const validateParams = (schema: ObjectSchema) => {
+  return (req: Request, res: Response, next: NextFunction): void => {
+    try {
+      const { error, value } = schema.validate(req.params, {
+        abortEarly: true,
+        stripUnknown: true,
+      });
+
+      if (error) {
+        const msg = error.details[0].message.replace(/"/g, "");
+        throw throwJoiValidationError(msg); // will become "Invalid ID" in global handler
+      }
+
+      req.params = value;
+      next();
+    } catch (err) {
+      next(err);
+    }
   };
 };

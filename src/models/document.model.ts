@@ -1,3 +1,30 @@
+// import { Schema, model } from "mongoose";
+
+// export const allowedDocumentCategories = [
+//   "Contract",
+//   "Template",
+//   "Agreement",
+//   "Policy",
+//   "Other"
+// ];
+
+// const documentSchema = new Schema(
+//   {
+//     name: { type: String, required: true },
+//     category: { 
+//       type: String, 
+//       required: true,
+//       enum: allowedDocumentCategories   // ✅ restrict to only these
+//     },
+//     documentDate: { type: Date, required: true },
+//     partiesInvolved: { type: String, required: true },
+//     fileKey: { type: String }
+//   },
+//   { timestamps: true }
+// );
+
+// export default model("Document", documentSchema);
+
 import { Schema, model } from "mongoose";
 
 export const allowedDocumentCategories = [
@@ -5,22 +32,43 @@ export const allowedDocumentCategories = [
   "Template",
   "Agreement",
   "Policy",
-  "Other"
+  "Other",
 ];
 
 const documentSchema = new Schema(
   {
     name: { type: String, required: true },
-    category: { 
-      type: String, 
+
+    category: {
+      type: String,
+      enum: allowedDocumentCategories,
       required: true,
-      enum: allowedDocumentCategories   // ✅ restrict to only these
     },
+
     documentDate: { type: Date, required: true },
+
     partiesInvolved: { type: String, required: true },
-    fileKey: { type: String }
+
+    fileKey: { type: String },
   },
-  { timestamps: true }
+  {
+    timestamps: true,
+    versionKey: false,
+
+    toJSON: {
+      transform: (_, ret) => {
+        delete ret.__v;
+        return ret;
+      },
+    },
+
+    toObject: {
+      transform: (_, ret) => {
+        delete ret.__v;
+        return ret;
+      },
+    },
+  }
 );
 
 export default model("Document", documentSchema);
