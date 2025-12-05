@@ -8,13 +8,12 @@ import { allowedAuditTypes } from "../models/audit.model";
 // ======================================================
 const createAuditSchema: ObjectSchema = Joi.object({
   name: Joi.string().required(),
-  type: Joi.string()
-    .valid(...allowedAuditTypes)
-    .required(),
+  type: Joi.string().valid(...allowedAuditTypes).required(),
   periodStart: Joi.date().required(),
   periodEnd: Joi.date().required(),
   auditor: Joi.string().required(),
-  completionDate: Joi.date().required()
+  completionDate: Joi.date().required(),
+  file: Joi.any().optional()
 });
 
 // ======================================================
@@ -22,23 +21,29 @@ const createAuditSchema: ObjectSchema = Joi.object({
 // ======================================================
 const updateAuditSchema: ObjectSchema = Joi.object({
   name: Joi.string().optional(),
-  type: Joi.string()
-    .valid(...allowedAuditTypes)
-    .optional(),
+  type: Joi.string().valid(...allowedAuditTypes).optional(),
   periodStart: Joi.date().optional(),
   periodEnd: Joi.date().optional(),
   auditor: Joi.string().optional(),
-  completionDate: Joi.date().optional()
-}).min(1); // at least one field must be present
+  completionDate: Joi.date().optional(),
+  file: Joi.any().optional()
+}).min(1); // At least one field required
 
 // ======================================================
-// Generic Validator (Same as your validateRequest)
+// PARAM ID Schema
+// ======================================================
+const auditIdSchema: ObjectSchema = Joi.object({
+  id: Joi.string().length(24).hex().required()
+});
+
+// ======================================================
+// Generic Validator
 // ======================================================
 const runValidation = (schema: ObjectSchema, data: any) => {
   const { error, value } = schema.validate(data, {
     abortEarly: true,
     stripUnknown: true,
-    convert: true,
+    convert: true
   });
 
   if (error) {
@@ -65,6 +70,15 @@ export class AuditMiddleware {
   static validateUpdate(req: Request, res: Response, next: NextFunction) {
     try {
       req.body = runValidation(updateAuditSchema, req.body);
+      next();
+    } catch (err) {
+      next(err);
+    }
+  }
+
+  static validateParams(req: Request, res: Response, next: NextFunction) {
+    try {
+      req.params = runValidation(auditIdSchema, req.params);
       next();
     } catch (err) {
       next(err);

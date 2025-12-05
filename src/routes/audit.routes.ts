@@ -2,7 +2,11 @@ import { Router } from "express";
 import multer from "multer";
 
 import * as AuditController from "../controllers/audit.controller";
-import { validateRequest, validateParams } from "../middlewares/validate.middleware";
+
+import {
+  validateRequest,
+  validateParams
+} from "../middlewares/validate.middleware";
 
 import {
   createAuditDto,
@@ -11,9 +15,9 @@ import {
 } from "../dto/audit.dto";
 
 const router = Router();
-
 const upload = multer({ storage: multer.memoryStorage() });
 
+// CREATE
 router.post(
   "/",
   upload.single("file"),
@@ -21,14 +25,17 @@ router.post(
   AuditController.create
 );
 
+// LIST
 router.get("/", AuditController.list);
 
+// GET BY ID
 router.get(
   "/:id",
   validateParams(auditIdDto),
   AuditController.getById
 );
 
+// UPDATE
 router.put(
   "/:id",
   upload.single("file"),
@@ -37,6 +44,7 @@ router.put(
   AuditController.update
 );
 
+// DELETE
 router.delete(
   "/:id",
   validateParams(auditIdDto),

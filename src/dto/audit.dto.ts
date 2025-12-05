@@ -8,7 +8,10 @@ export const allowedAuditTypes = [
   "Operational Audit"
 ];
 
-// =============== CREATE DTO =================
+export const auditIdDto = Joi.object({
+  id: Joi.string().length(24).hex().required()
+});
+
 export const createAuditDto = Joi.object({
   name: Joi.string().required(),
   type: Joi.string().valid(...allowedAuditTypes).required(),
@@ -16,10 +19,9 @@ export const createAuditDto = Joi.object({
   periodEnd: Joi.date().required(),
   auditor: Joi.string().required(),
   completionDate: Joi.date().required(),
-  file: Joi.any().optional() // multer file
+  file: Joi.any().optional()
 });
 
-// =============== UPDATE DTO =================
 export const updateAuditDto = Joi.object({
   name: Joi.string().optional(),
   type: Joi.string().valid(...allowedAuditTypes).optional(),
@@ -28,9 +30,4 @@ export const updateAuditDto = Joi.object({
   auditor: Joi.string().optional(),
   completionDate: Joi.date().optional(),
   file: Joi.any().optional()
-});
-
-// =============== PARAM ID DTO ===============
-export const auditIdDto = Joi.object({
-  id: Joi.string().length(24).hex().required()
-});
+}).min(1);
