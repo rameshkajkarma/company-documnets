@@ -1,17 +1,17 @@
 import { Request, Response, NextFunction } from "express";
 import { ObjectSchema } from "joi";
-import { throwJoiValidationError } from "../utils/response.util"; // use your helper
+import { throwJoiValidationError } from "../utils/response.util";
 
-// ========================
-// Validate Body
-// ========================
+// ===============================
+// Validate Request Body
+// ===============================
 export const validateRequest = (schema: ObjectSchema) => {
   return (req: Request, res: Response, next: NextFunction): void => {
     try {
       const { error, value } = schema.validate(req.body, {
-        abortEarly: true,      // stop on first error
-        stripUnknown: true,    // remove extra fields
-        convert: true,         // auto convert types
+        abortEarly: true,
+        stripUnknown: true,
+        convert: true,
       });
 
       if (error) {
@@ -27,9 +27,9 @@ export const validateRequest = (schema: ObjectSchema) => {
   };
 };
 
-// ========================
-// Validate Params (ID)
-// ========================
+// ===============================
+// Validate URL Params (ID)
+// ===============================
 export const validateParams = (schema: ObjectSchema) => {
   return (req: Request, res: Response, next: NextFunction): void => {
     try {
@@ -40,7 +40,7 @@ export const validateParams = (schema: ObjectSchema) => {
 
       if (error) {
         const msg = error.details[0].message.replace(/"/g, "");
-        throw throwJoiValidationError(msg); // will become "Invalid ID" in global handler
+        throw throwJoiValidationError(msg);
       }
 
       req.params = value;

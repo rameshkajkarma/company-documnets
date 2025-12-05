@@ -2,25 +2,41 @@ import { Router } from "express";
 import multer from "multer";
 
 import * as LicenseController from "../controllers/license.controller";
-import { validateRequest, validateParams } from "../middlewares/validate.middleware";
-import { createLicenseDto, updateLicenseDto, licenseIdDto } from "../dto/license.dto";
+import {
+  validateRequest,
+  validateParams,
+} from "../middlewares/validate.middleware";
+
+import {
+  createLicenseDto,
+  updateLicenseDto,
+  licenseIdDto,
+} from "../dto/license.dto";
 
 const router = Router();
 
-// USE MEMORY STORAGE (REQUIRED FOR S3)
+// MEMORY STORAGE for S3
 const upload = multer({ storage: multer.memoryStorage() });
 
+// ---------- CREATE ----------
 router.post(
   "/",
-  upload.single("document"),          // multer first
-  validateRequest(createLicenseDto),  // then validation
-  LicenseController.create            // then controller
+  upload.single("document"),
+  validateRequest(createLicenseDto),
+  LicenseController.create
 );
 
+// ---------- GET ALL ----------
 router.get("/", LicenseController.getAll);
 
-router.get("/:id", validateParams(licenseIdDto), LicenseController.getOne);
+// ---------- GET ONE ----------
+router.get(
+  "/:id",
+  validateParams(licenseIdDto),
+  LicenseController.getOne
+);
 
+// ---------- UPDATE ----------
 router.put(
   "/:id",
   upload.single("document"),
@@ -29,6 +45,11 @@ router.put(
   LicenseController.update
 );
 
-router.delete("/:id", validateParams(licenseIdDto), LicenseController.remove);
+// ---------- DELETE ----------
+router.delete(
+  "/:id",
+  validateParams(licenseIdDto),
+  LicenseController.remove
+);
 
 export default router;
