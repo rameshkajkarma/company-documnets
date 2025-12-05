@@ -1,28 +1,34 @@
-import { Router } from 'express';
-import * as controller from '../controllers/license.controller';
-import multer from 'multer';
-import { validate } from '../middlewares/validate.middleware';
-import { createLicenseSchema, updateLicenseSchema } from '../dto/license.dto';
+import { Router } from "express";
+import multer from "multer";
+
+import * as LicenseController from "../controllers/license.controller";
+import { validateRequest, validateParams } from "../middlewares/validate.middleware";
+import { createLicenseDto, updateLicenseDto, licenseIdDto } from "../dto/license.dto";
 
 const router = Router();
-const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 10 * 1024 * 1024 } }); // 10MB
 
-// Create license (file optional)
-router.post('/', upload.single('document'), validate(createLicenseSchema), controller.createLicense);
+// USE MEMORY STORAGE (REQUIRED FOR S3)
+const upload = multer({ storage: multer.memoryStorage() });
 
-// List with pagination
-router.get('/', controller.listLicenses);
+router.post(
+  "/",
+  upload.single("document"),          // multer first
+  validateRequest(createLicenseDto),  // then validation
+  LicenseController.create            // then controller
+);
 
-// Get one
-router.get('/:id', controller.getLicense);
+router.get("/", LicenseController.getAll);
 
-// Update (file optional)
-router.put('/:id', upload.single('document'), validate(updateLicenseSchema), controller.updateLicense);
+router.get("/:id", validateParams(licenseIdDto), LicenseController.getOne);
 
-// Delete
-router.delete('/:id', controller.deleteLicense);
+router.put(
+  "/:id",
+  upload.single("document"),
+  validateParams(licenseIdDto),
+  validateRequest(updateLicenseDto),
+  LicenseController.update
+);
 
-// Get presigned URL for the document
-router.get('/:id/document', controller.getDocumentPresignedUrl);
+router.delete("/:id", validateParams(licenseIdDto), LicenseController.remove);
 
 export default router;

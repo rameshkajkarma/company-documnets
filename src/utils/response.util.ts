@@ -1,0 +1,67 @@
+import { Response } from "express";
+
+export const SUCCESS_MESSAGES = {
+  LICENSE_CREATED: "License created successfully",
+  LICENSE_LIST_FETCHED: "License list fetched successfully",
+  LICENSE_FETCHED: "License fetched successfully",
+  LICENSE_UPDATED: "License updated successfully",
+  LICENSE_DELETED: "License deleted successfully",
+};
+
+export const ERROR_MESSAGES = {
+  INTERNAL_SERVER_ERROR: "Something went wrong",
+  VALIDATION_FAILED: "Validation failed",
+  INVALID_ID: "Invalid ID format",
+  LICENSE_NOT_FOUND: "License not found",
+};
+
+// -------- SUCCESS (200) --------
+export const sendSuccess = (
+  res: Response,
+  message: string,
+  data: any = null
+) => {
+  return res.status(200).json({
+    success: true,
+    statusCode: 200,
+    message,
+    data,
+  });
+};
+
+// -------- CREATED (201) --------
+export const sendCreated = (
+  res: Response,
+  message: string,
+  data: any = null
+) => {
+  return res.status(201).json({
+    success: true,
+    statusCode: 201,
+    message,
+    data,
+  });
+};
+
+// -------- ERROR (custom status) --------
+export const sendError = (
+  res: Response,
+  statusCode: number,
+  message: string,
+  error: any = null
+) => {
+  return res.status(statusCode).json({
+    success: false,
+    statusCode,
+    message,
+    error,
+  });
+};
+
+// -------- JOI VALIDATION ERROR THROWER --------
+export const throwJoiValidationError = (message: string) => {
+  const error: any = new Error(message);
+  error.type = "JoiValidationError";
+  error.statusCode = 400;
+  return error;
+};
