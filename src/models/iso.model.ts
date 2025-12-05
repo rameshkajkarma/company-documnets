@@ -16,7 +16,6 @@ const allowedStandards = [
   "ISO 45001:2018",
   "ISO 50001:2018"
 ];
-
 const ISOSchema = new Schema<ISO>(
   {
     certificateName: { type: String, required: true },
@@ -24,7 +23,7 @@ const ISOSchema = new Schema<ISO>(
     isoStandard: {
       type: String,
       required: true,
-      enum: allowedStandards   // ❌ No other ISO allowed
+      enum: allowedStandards
     },
 
     issueDate: { type: Date, required: true },
@@ -34,8 +33,12 @@ const ISOSchema = new Schema<ISO>(
 
     fileKey: { type: String, required: true }
   },
-  { timestamps: true }
+  { 
+    timestamps: true,
+    versionKey: false   // <-- REMOVE __v COMPLETELY 
+  }
 );
+
 
 export const ISOModel = model<ISO>("ISO", ISOSchema);
 export { allowedStandards };

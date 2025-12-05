@@ -1,37 +1,44 @@
 import { Router } from "express";
 import multer from "multer";
 
-import {
-  createISOController,
-  listISOController,
-  getISOByIdController,
-  updateISOController,
-  deleteISOController
-} from "../controllers/iso.controller";
+import * as ISOController from "../controllers/iso.controller";
+import { validateRequest, validateParams, validateQuery } from "../middlewares/iso.middleware";
+import { createISODto, updateISODto, isoIdDto, isoQueryDto } from "../dto/iso.dto";
 
-import { isoMiddleware } from "../middlewares/iso.middleware";
-
-const upload = multer();
 const router = Router();
+const upload = multer({ storage: multer.memoryStorage() });
 
-// Create ISO
 router.post(
   "/",
-  isoMiddleware,
   upload.single("file"),
-  createISOController
+  validateRequest(createISODto),
+  ISOController.create
 );
 
-// List ISO with pagination
-router.get("/", listISOController);
+router.get(
+  "/",
+  validateQuery(isoQueryDto),
+  ISOController.getAll
+);
 
-// Get ISO by ID
-router.get("/:id", getISOByIdController);
+router.get(
+  "/:id",
+  validateParams(isoIdDto),
+  ISOController.getOne
+);
 
-// Update ISO
-router.put("/:id", upload.single("file"), updateISOController);
+router.put(
+  "/:id",
+  upload.single("file"),
+  validateParams(isoIdDto),
+  validateRequest(updateISODto),
+  ISOController.update
+);
 
-// Delete ISO
-router.delete("/:id", deleteISOController);
+router.delete(
+  "/:id",
+  validateParams(isoIdDto),
+  ISOController.remove
+);
 
 export default router;
