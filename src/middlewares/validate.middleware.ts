@@ -24,6 +24,27 @@ export const validateRequest = (schema: ObjectSchema) => {
     }
   };
 };
+export const validateQuery = (schema: ObjectSchema) => {
+  return (req: Request, res: Response, next: NextFunction): void => {
+    try {
+      const { error, value } = schema.validate(req.query, {
+        abortEarly: true,
+        stripUnknown: true,
+        convert: true,
+      });
+
+      if (error) {
+        const msg = error.details[0].message.replace(/"/g, "");
+        throw throwJoiValidationError(msg);
+      }
+
+      req.query = value;
+      next();
+    } catch (err) {
+      next(err);
+    }
+  };
+};
 
 
 export const validateParams = (schema: ObjectSchema) => {

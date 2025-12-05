@@ -18,6 +18,14 @@ export const updateLicenseDto = Joi.object({
   documentKey: Joi.string().optional(),
 });
 
+// for params /:id
 export const licenseIdDto = Joi.object({
   id: Joi.string().length(24).hex().required(),
+});
+
+// OPTIONAL: for GET ALL filters
+export const licenseQueryDto = Joi.object({
+  page: Joi.number().integer().min(1).optional(),
+  limit: Joi.number().integer().min(1).max(100).optional(),
+  search: Joi.string().optional(),
 });

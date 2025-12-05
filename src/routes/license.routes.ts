@@ -5,18 +5,21 @@ import * as LicenseController from "../controllers/license.controller";
 import {
   validateRequest,
   validateParams,
+  validateQuery,
 } from "../middlewares/validate.middleware";
 
 import {
   createLicenseDto,
   updateLicenseDto,
   licenseIdDto,
+  licenseQueryDto,
 } from "../dto/license.dto";
 
 const router = Router();
 
 // MEMORY STORAGE for S3
 const upload = multer({ storage: multer.memoryStorage() });
+
 
 // ---------- CREATE ----------
 router.post(
@@ -26,8 +29,14 @@ router.post(
   LicenseController.create
 );
 
+
 // ---------- GET ALL ----------
-router.get("/", LicenseController.getAll);
+router.get(
+  "/",
+  validateQuery(licenseQueryDto),     //  ✅ added pagination/search validation
+  LicenseController.getAll
+);
+
 
 // ---------- GET ONE ----------
 router.get(
@@ -35,6 +44,7 @@ router.get(
   validateParams(licenseIdDto),
   LicenseController.getOne
 );
+
 
 // ---------- UPDATE ----------
 router.put(
@@ -45,11 +55,13 @@ router.put(
   LicenseController.update
 );
 
+
 // ---------- DELETE ----------
 router.delete(
   "/:id",
   validateParams(licenseIdDto),
   LicenseController.remove
 );
+
 
 export default router;
