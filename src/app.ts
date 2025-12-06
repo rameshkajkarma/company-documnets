@@ -3,6 +3,7 @@ import morgan from 'morgan';
 import dotenv from 'dotenv';
 import licenseRoutes from './routes/license.routes';
 import { errorHandler } from './middlewares/error.middleware';
+import hardwareTransferRoutes from './routes/hardwareTransfer.routes';
 dotenv.config();
 
 const app = express();
@@ -15,6 +16,7 @@ app.get('/health', (req, res) => res.json({ ok: true }));
 
 app.use('/api/licenses', licenseRoutes);
 
+app.use('/api/hardware-transfer', hardwareTransferRoutes);
 app.use(errorHandler);
 
 export default app;
