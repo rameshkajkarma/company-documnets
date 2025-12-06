@@ -22,6 +22,13 @@ export const SUCCESS_MESSAGES = {
   ISO_FETCHED: "ISO document fetched successfully",
   ISO_UPDATED: "ISO document updated successfully",
   ISO_DELETED: "ISO document deleted successfully",
+
+  // -------- HARDWARE TRANSFER --------
+  HARDWARE_TRANSFER_CREATED: "Hardware transfer created successfully",
+  HARDWARE_TRANSFER_LIST_FETCHED: "Hardware transfer list fetched successfully",
+  HARDWARE_TRANSFER_FETCHED: "Hardware transfer fetched successfully",
+  HARDWARE_TRANSFER_UPDATED: "Hardware transfer updated successfully",
+  HARDWARE_TRANSFER_DELETED: "Hardware transfer deleted successfully",
 };
 
 // -------- ERROR MESSAGES --------
@@ -42,6 +49,12 @@ export const ERROR_MESSAGES = {
   ISO_NOT_FOUND: "ISO document not found",
   ISO_UPLOAD_FAILED: "ISO document upload failed",
   ISO_DELETE_FAILED: "ISO document delete failed",
+
+  // -------- HARDWARE TRANSFER --------
+  HARDWARE_TRANSFER_NOT_FOUND: "Hardware transfer not found",
+  HARDWARE_TRANSFER_SAVE_FAILED: "Failed to save hardware transfer",
+  HARDWARE_TRANSFER_UPDATE_FAILED: "Failed to update hardware transfer",
+  HARDWARE_TRANSFER_DELETE_FAILED: "Failed to delete hardware transfer",
 };
 
 // -------- SUCCESS (200) --------
