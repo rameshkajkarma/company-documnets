@@ -1,10 +1,41 @@
 import { HardwareTransferModel } from "../models/hardwareTransfer.model";
 
 export class HardwareTransferService {
-  async create(data: any) {
-    return await HardwareTransferModel.create(data);
+
+  // ⭐ Automatically calculate status
+  private calculateStatus(data: any) {
+    const today = new Date();
+
+    // Permanent transfer always => Permanent
+    if (data.transferType === "Permanent") {
+      return "Permanent";
+    }
+
+    // Temporary transfer
+    if (data.transferType === "Temporary") {
+      if (data.expectedReturnDate) {
+        const expectedDate = new Date(data.expectedReturnDate);
+
+        return today >= expectedDate ? "Returned" : "Active";
+      }
+
+      return "Active"; // If no expected return date
+    }
+
+    return "Active"; // default
   }
 
+  // ⭐ CREATE TRANSFER
+  async create(data: any) {
+    const status = this.calculateStatus(data);
+
+    return await HardwareTransferModel.create({
+      ...data,
+      status,
+    });
+  }
+
+  // ⭐ LIST TRANSFERS
   async list(page: number, limit: number, filters: any) {
     const skip = (page - 1) * limit;
 
@@ -26,14 +57,23 @@ export class HardwareTransferService {
     };
   }
 
+  // ⭐ GET BY ID
   async getById(id: string) {
     return HardwareTransferModel.findById(id);
   }
 
+  // ⭐ UPDATE TRANSFER (recalculate status)
   async update(id: string, data: any) {
-    return HardwareTransferModel.findByIdAndUpdate(id, data, { new: true });
+    const status = this.calculateStatus(data);
+
+    return HardwareTransferModel.findByIdAndUpdate(
+      id,
+      { ...data, status },
+      { new: true }
+    );
   }
 
+  // ⭐ DELETE TRANSFER
   async delete(id: string) {
     return HardwareTransferModel.findByIdAndDelete(id);
   }

@@ -77,7 +77,7 @@ const schema = new Schema(
   },
   {
     timestamps: true,
-    versionKey: false, // ⭐ Removes __v permanently
+    versionKey: false, 
   }
 );
 
