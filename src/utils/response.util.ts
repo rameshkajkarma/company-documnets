@@ -9,6 +9,13 @@ export const SUCCESS_MESSAGES = {
   LICENSE_UPDATED: "License updated successfully",
   LICENSE_DELETED: "License deleted successfully",
 
+  // -------- SOFTWARE MESSAGES --------
+  SOFTWARE_CREATED: "Software created successfully",
+  SOFTWARE_LIST_FETCHED: "Software list fetched successfully",
+  SOFTWARE_FETCHED: "Software fetched successfully",
+  SOFTWARE_UPDATED: "Software updated successfully",
+  SOFTWARE_DELETED: "Software deleted successfully",
+
   // Document
   DOCUMENT_CREATED: "Document created successfully",
   DOCUMENT_LIST_FETCHED: "Document list fetched successfully",
@@ -32,6 +39,10 @@ export const ERROR_MESSAGES = {
 
   // License
   LICENSE_NOT_FOUND: "License not found",
+
+  // -------- SOFTWARE ERRORS --------
+  SOFTWARE_NOT_FOUND: "Software not found",
+  LICENSE_KEY_EXISTS: "License key already exists",   // <-- Added here
 
   // Document
   DOCUMENT_NOT_FOUND: "Document not found",
