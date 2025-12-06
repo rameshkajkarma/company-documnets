@@ -1,67 +1,89 @@
 import Joi, { ObjectSchema } from "joi";
 
-
 const carrierEnum = ["Zain Kuwait", "Ooredoo Kuwait", "STC Kuwait", "Other"];
 const currencyEnum = ["KWD", "USD", "EUR", "GBP", "AED", "SAR"];
-const departmentEnum = ["IT", "Sales", "Marketing", "Finance", "Operations", "HR", "Management", "Other"];
+const departmentEnum = [
+  "IT",
+  "Sales",
+  "Marketing",
+  "Finance",
+  "Operations",
+  "HR",
+  "Management",
+  "Other"
+];
 const statusEnum = ["Active", "Inactive", "Suspended", "Expired"];
 
-// Reusable validator for dd-mm-yyyy strings
+// dd-mm-yyyy validator
 const ddmmyyyy = Joi.string()
   .pattern(/^\d{2}-\d{2}-\d{4}$/)
-  .message("must be in dd-mm-yyyy format");
+  .message("must be in dd-mm-yyyy format")
+  .required();
+
+// IMEI strict
+const imeiValidator = Joi.string()
+  .pattern(/^[0-9]{15}$/)
+  .message("IMEI must be exactly 15 digits")
+  .required();
 
 export const createSimSchema: ObjectSchema = Joi.object({
   simNumber: Joi.string().trim().required(),
-  phoneNumber: Joi.string().trim().optional().allow("", null),
+  phoneNumber: Joi.string().trim().required(),
+
   carrier: Joi.string().valid(...carrierEnum).required(),
-  planType: Joi.string().trim().optional().allow("", null),
-  monthlyFee: Joi.number().min(0).optional().default(0),
-  currency: Joi.string().valid(...currencyEnum).optional().default("KWD"),
-  extraCharges: Joi.number().min(0).optional().default(0),
-  simCharges: Joi.number().min(0).optional().default(0),
-  dataLimit: Joi.string().trim().optional().allow("", null),
+  planType: Joi.string().trim().required(),
 
-  // dd-mm-yyyy strings
-  activationDate: ddmmyyyy.optional().allow("", null),
-  expiryDate: ddmmyyyy.optional().allow("", null),
+  monthlyFee: Joi.number().min(0).required(),
+  currency: Joi.string().valid(...currencyEnum).required(),
+  extraCharges: Joi.number().min(0).required(),
+  simCharges: Joi.number().min(0).required(),
+  dataLimit: Joi.string().trim().required(),
 
-  assignedTo: Joi.string().trim().optional().allow("", null),
-  department: Joi.string().valid(...departmentEnum).optional().allow(null),
-  deviceImei: Joi.string().trim().length(15).optional().allow("", null),
-  status: Joi.string().valid(...statusEnum).optional().default("Active"),
-  notes: Joi.string().max(2000).optional().allow("", null),
+  activationDate: ddmmyyyy,
+  expiryDate: ddmmyyyy,
+
+  assignedTo: Joi.string().trim().required(),
+  department: Joi.string().valid(...departmentEnum).required(),
+
+  deviceImei: imeiValidator,
+
+  status: Joi.string().valid(...statusEnum).required(),
+  notes: Joi.string().max(2000).optional(), // keep optional
 });
 
 export const updateSimSchema: ObjectSchema = Joi.object({
-  simNumber: Joi.string().trim().optional(),
-  phoneNumber: Joi.string().trim().optional().allow("", null),
-  carrier: Joi.string().valid(...carrierEnum).optional(),
-  planType: Joi.string().trim().optional().allow("", null),
-  monthlyFee: Joi.number().min(0).optional(),
-  currency: Joi.string().valid(...currencyEnum).optional(),
-  extraCharges: Joi.number().min(0).optional(),
-  simCharges: Joi.number().min(0).optional(),
-  dataLimit: Joi.string().trim().optional().allow("", null),
-  activationDate: ddmmyyyy.optional().allow("", null),
-  expiryDate: ddmmyyyy.optional().allow("", null),
-  assignedTo: Joi.string().trim().optional().allow("", null),
-  department: Joi.string().valid(...departmentEnum).optional().allow(null),
-  deviceImei: Joi.string().trim().length(15).optional().allow("", null),
-  status: Joi.string().valid(...statusEnum).optional(),
-  notes: Joi.string().max(2000).optional().allow("", null),
+  simNumber: Joi.string().trim(),
+  phoneNumber: Joi.string().trim(),
+
+  carrier: Joi.string().valid(...carrierEnum),
+  planType: Joi.string().trim(),
+
+  monthlyFee: Joi.number().min(0),
+  currency: Joi.string().valid(...currencyEnum),
+  extraCharges: Joi.number().min(0),
+  simCharges: Joi.number().min(0),
+  dataLimit: Joi.string().trim(),
+
+  activationDate: ddmmyyyy,
+  expiryDate: ddmmyyyy,
+
+  assignedTo: Joi.string().trim(),
+  department: Joi.string().valid(...departmentEnum),
+
+  deviceImei: imeiValidator,
+
+  status: Joi.string().valid(...statusEnum),
+  notes: Joi.string().max(2000),
 }).min(1);
 
-// Params validation (for :id)
 export const idParamSchema: ObjectSchema = Joi.object({
   id: Joi.string().hex().length(24).required(),
 });
 
-// Query validation for GET /sim (pagination + filters)
 export const getSimsQuerySchema: ObjectSchema = Joi.object({
-  page: Joi.number().integer().min(1).optional().default(1),
-  limit: Joi.number().integer().min(1).max(100).optional().default(10),
-  carrier: Joi.string().valid(...carrierEnum).optional(),
-  status: Joi.string().valid(...statusEnum).optional(),
-  department: Joi.string().valid(...departmentEnum).optional(),
+  page: Joi.number().integer().min(1).default(1),
+  limit: Joi.number().integer().min(1).max(100).default(10),
+  carrier: Joi.string().valid(...carrierEnum),
+  status: Joi.string().valid(...statusEnum),
+  department: Joi.string().valid(...departmentEnum),
 });
