@@ -22,6 +22,13 @@ export const SUCCESS_MESSAGES = {
   ISO_FETCHED: "ISO document fetched successfully",
   ISO_UPDATED: "ISO document updated successfully",
   ISO_DELETED: "ISO document deleted successfully",
+
+  // -------- ADDED: NETWORK EQUIPMENT SUCCESS ----------
+  NETWORK_EQUIPMENT_CREATED: "Network equipment created successfully",
+  NETWORK_EQUIPMENT_LIST_FETCHED: "Network equipment list fetched successfully",
+  NETWORK_EQUIPMENT_FETCHED: "Network equipment fetched successfully",
+  NETWORK_EQUIPMENT_UPDATED: "Network equipment updated successfully",
+  NETWORK_EQUIPMENT_DELETED: "Network equipment deleted successfully",
 };
 
 // -------- ERROR MESSAGES --------
@@ -42,6 +49,10 @@ export const ERROR_MESSAGES = {
   ISO_NOT_FOUND: "ISO document not found",
   ISO_UPLOAD_FAILED: "ISO document upload failed",
   ISO_DELETE_FAILED: "ISO document delete failed",
+
+  // -------- ADDED: NETWORK EQUIPMENT ERRORS ----------
+  NETWORK_EQUIPMENT_NOT_FOUND: "Network equipment not found",
+  NETWORK_EQUIPMENT_EXISTS: "Network equipment already exists",
 };
 
 // -------- SUCCESS (200) --------
