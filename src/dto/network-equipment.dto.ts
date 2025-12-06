@@ -8,34 +8,34 @@ export const statusEnum = [
   "Online", "Offline", "Maintenance", "Decommissioned"
 ] as const;
 
+// DATE FORMAT dd-mm-yyyy
 const ddmmyyyy = Joi.string()
   .pattern(/^\d{2}-\d{2}-\d{4}$/)
   .message("must be in dd-mm-yyyy format");
 
+// IP VALIDATION (IPv4)
 const ipv4 = Joi.string()
   .ip({ version: ["ipv4"] })
   .message("must be a valid IPv4 address");
 
-const mac = Joi.string()
-  .pattern(/^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})$/)
-  .message("must be a valid MAC address");
+// MAC VALIDATION → ANY STRING ALLOWED NOW
+const mac = Joi.string().trim();   // <--- UPDATED
 
 const portOptions = [2, 4, 8, 16, 24, 48];
 
-// -------------------------------
+// ===============================
 // CREATE SCHEMA (UPDATED)
-// -------------------------------
+// ===============================
 export const createNetworkEquipmentSchema: ObjectSchema = Joi.object({
   equipmentName: Joi.string().trim().required(),
   equipmentType: Joi.string().valid(...equipmentTypeEnum).required(),
 
-  // OPTIONAL in create
+  // OPTIONAL FIELDS
   ipAddress: ipv4.optional(),
-  macAddress: mac.optional(),
+  macAddress: mac.optional(),   // <--- UPDATED (no regex)
 
-  // serial required
+  // REQUIRED FIELDS
   serialNumber: Joi.string().trim().required(),
-
   numberOfPorts: Joi.number().valid(...portOptions).required(),
   location: Joi.string().trim().required(),
   purchaseDate: ddmmyyyy.required(),
@@ -44,15 +44,15 @@ export const createNetworkEquipmentSchema: ObjectSchema = Joi.object({
   status: Joi.string().valid(...statusEnum).required()
 });
 
-// -------------------------------
-// UPDATE SCHEMA (unchanged)
-// -------------------------------
+// ===============================
+// UPDATE SCHEMA
+// ===============================
 export const updateNetworkEquipmentSchema = Joi.object({
   equipmentName: Joi.string().trim(),
   equipmentType: Joi.string().valid(...equipmentTypeEnum),
 
   ipAddress: ipv4,
-  macAddress: mac,
+  macAddress: mac,  // <--- UPDATED (no regex)
 
   serialNumber: Joi.string().trim(),
   numberOfPorts: Joi.number().valid(...portOptions),
@@ -63,7 +63,7 @@ export const updateNetworkEquipmentSchema = Joi.object({
   status: Joi.string().valid(...statusEnum)
 }).min(1);
 
-// -------------------------------
+// ===============================
 export const idParamSchema = Joi.object({
   id: Joi.string().hex().length(24).required()
 });

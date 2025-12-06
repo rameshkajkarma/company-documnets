@@ -32,6 +32,34 @@ class NetworkEquipmentService {
   async findBySerial(serial: string) {
     return NetworkEquipmentModel.findOne({ serialNumber: serial }).lean().select("-__v");
   }
+
+  // ---------------------------------------------------
+  // ADD THESE METHODS BELOW
+  // ---------------------------------------------------
+
+  async findByMac(mac: string) {
+    return NetworkEquipmentModel.findOne({ macAddress: mac })
+      .lean()
+      .select("-__v");
+  }
+
+  async findByMacExcludeId(mac: string, id: string) {
+    return NetworkEquipmentModel.findOne({
+      macAddress: mac,
+      _id: { $ne: id }
+    })
+      .lean()
+      .select("-__v");
+  }
+
+  async findBySerialExcludeId(serial: string, id: string) {
+    return NetworkEquipmentModel.findOne({
+      serialNumber: serial,
+      _id: { $ne: id }
+    })
+      .lean()
+      .select("-__v");
+  }
 }
 
 export const networkEquipmentService = new NetworkEquipmentService();

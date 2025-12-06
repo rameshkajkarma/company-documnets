@@ -16,66 +16,48 @@ class NetworkEquipmentController {
   // -------------------------------
   // CREATE
   // -------------------------------
-async create(req: Request, res: Response) {
-  try {
-    const body: any = { ...req.body };
+  async create(req: Request, res: Response) {
+    try {
+      const body: any = { ...req.body };
 
-    body.purchaseDate = parseDDMMYYYY(body.purchaseDate);
-    body.warrantyExpiry = parseDDMMYYYY(body.warrantyExpiry);
+      body.purchaseDate = parseDDMMYYYY(body.purchaseDate);
+      body.warrantyExpiry = parseDDMMYYYY(body.warrantyExpiry);
 
-    const created = await networkEquipmentService.create(body);
+      const duplicates: string[] = [];
 
-    return sendCreated(
-      res,
-      SUCCESS_MESSAGES?.NETWORK_EQUIPMENT_CREATED ??
-        "Network equipment created",
-      created
-    );
-  } catch (err: any) {
-    // Duplicate handling
-    if (err?.code === 11000) {
-      const duplicateField = Object.keys(err.keyValue || {})[0];
-
-      // ❌ serial number duplicate → STOP and return error
-      if (duplicateField === "serialNumber") {
-        return sendError(res, 409, "Serial number already exists", err.keyValue);
+      // MAC duplicate check
+      if (body.macAddress) {
+        const macExists = await networkEquipmentService.findByMac(body.macAddress);
+        if (macExists) duplicates.push("macAddress");
       }
 
-      // ✅ ip/mac duplicate → ALLOWED
-      // remove the conflicting field and retry once
-      const cleaned = { ...req.body };
-      delete cleaned[duplicateField];
-
-      try {
-        const created = await networkEquipmentService.create(cleaned);
-
-        return sendCreated(
-          res,
-          SUCCESS_MESSAGES?.NETWORK_EQUIPMENT_CREATED ??
-            "Network equipment created",
-          created
-        );
-      } catch (retryErr: any) {
-        return sendError(
-          res,
-          500,
-          ERROR_MESSAGES?.INTERNAL_SERVER_ERROR ??
-            "Something went wrong",
-          retryErr?.message ?? retryErr
-        );
+      // Serial duplicate check
+      if (body.serialNumber) {
+        const serialExists = await networkEquipmentService.findBySerial(body.serialNumber);
+        if (serialExists) duplicates.push("serialNumber");
       }
+
+      if (duplicates.length > 0) {
+        return sendError(res, 409, "Duplicate values", { duplicates });
+      }
+
+      const created = await networkEquipmentService.create(body);
+
+      return sendCreated(
+        res,
+        SUCCESS_MESSAGES?.NETWORK_EQUIPMENT_CREATED ??
+          "Network equipment created",
+        created
+      );
+    } catch (err: any) {
+      return sendError(
+        res,
+        500,
+        ERROR_MESSAGES?.INTERNAL_SERVER_ERROR ?? "Something went wrong",
+        err?.message ?? err
+      );
     }
-
-    // other errors
-    return sendError(
-      res,
-      500,
-      ERROR_MESSAGES?.INTERNAL_SERVER_ERROR ?? "Something went wrong",
-      err?.message ?? err
-    );
   }
-}
-
 
   // -------------------------------
   // GET ALL
@@ -83,15 +65,13 @@ async create(req: Request, res: Response) {
   async getAll(req: Request, res: Response) {
     try {
       const q: any = req.query || {};
-
       const page = Number(q.page || 1);
       const limit = Number(q.limit || 10);
 
       const filter: any = {};
       if (q.equipmentType) filter.equipmentType = q.equipmentType;
       if (q.status) filter.status = q.status;
-      if (q.location)
-        filter.location = { $regex: q.location, $options: "i" };
+      if (q.location) filter.location = { $regex: q.location, $options: "i" };
 
       const result = await networkEquipmentService.getAll(filter, page, limit);
 
@@ -117,7 +97,6 @@ async create(req: Request, res: Response) {
   async getOne(req: Request, res: Response) {
     try {
       const id = req.params.id;
-
       const item = await networkEquipmentService.getById(id);
 
       if (!item) {
@@ -159,6 +138,30 @@ async create(req: Request, res: Response) {
       if (body.warrantyExpiry)
         body.warrantyExpiry = parseDDMMYYYY(body.warrantyExpiry);
 
+      const duplicates: string[] = [];
+
+      // MAC duplicate check
+      if (body.macAddress) {
+        const macExists = await networkEquipmentService.findByMacExcludeId(
+          body.macAddress,
+          id
+        );
+        if (macExists) duplicates.push("macAddress");
+      }
+
+      // Serial duplicate check
+      if (body.serialNumber) {
+        const serialExists = await networkEquipmentService.findBySerialExcludeId(
+          body.serialNumber,
+          id
+        );
+        if (serialExists) duplicates.push("serialNumber");
+      }
+
+      if (duplicates.length > 0) {
+        return sendError(res, 409, "Duplicate values", { duplicates });
+      }
+
       const updated = await networkEquipmentService.update(id, body);
 
       if (!updated) {
@@ -177,22 +180,6 @@ async create(req: Request, res: Response) {
         updated
       );
     } catch (err: any) {
-      if (err?.code === 11000) {
-        const duplicateField = Object.keys(err.keyValue || {})[0];
-
-        if (duplicateField === "serialNumber") {
-          return sendError(res, 409, "Serial number already exists", err.keyValue);
-        }
-
-        // ipAddress/macAddress duplicates allowed
-        return sendSuccess(
-          res,
-          SUCCESS_MESSAGES?.NETWORK_EQUIPMENT_UPDATED ??
-            "Network equipment updated",
-          err.keyValue
-        );
-      }
-
       return sendError(
         res,
         500,
